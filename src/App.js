@@ -7,24 +7,17 @@ function App() {
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    fetchJobs();
+    getJobs()
+      .then(res => setJobs(res.data))
+      .catch(err => console.error('Error fetching jobs:', err));
   }, []);
-
-  const fetchJobs = async () => {
-    try {
-      const res = await getJobs();
-      setJobs(res.data);
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-    }
-  };
 
   const handleJobAdded = async (newJob) => {
     try {
       const res = await addJob(newJob);
       setJobs(prev => [...prev, res.data]);
     } catch (err) {
-      console.error("Error adding job:", err);
+      console.error('Error adding job:', err);
     }
   };
 
@@ -33,18 +26,19 @@ function App() {
       await deleteJob(id);
       setJobs(prev => prev.filter(job => job._id !== id));
     } catch (err) {
-      console.error("Error deleting job:", err);
+      console.error('Error deleting job:', err);
     }
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       const res = await updateJobStatus(id, newStatus);
+      const updatedJob = res.data;
       setJobs(prev =>
-        prev.map(job => (job._id === id ? res.data : job))
+        prev.map(job => (job._id === id ? updatedJob : job))
       );
     } catch (err) {
-      console.error("Error updating job status:", err);
+      console.error('Error updating status:', err);
     }
   };
 
@@ -52,7 +46,7 @@ function App() {
     <div className="container">
       <h1>Student Job Tracker</h1>
       <AddJobForm onJobAdded={handleJobAdded} />
-
+      
       {jobs.length === 0 ? (
         <p>No job applications found.</p>
       ) : (
